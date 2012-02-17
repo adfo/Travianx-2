@@ -1,31 +1,26 @@
 <?php
-require_once( MODEL_PATH."register.php" );
-require_once( MODEL_PATH."queue.php" );
-class SetupModel extends ModelBase
-{
+require_once(MODEL_PATH.'register.php');
+require_once(MODEL_PATH.'queue.php');
+class SetupModel extends ModelBase{
 
-    public function processSetup( $map_size, $adminEmail )
-    {
-        $this->_createTables( );
-        $this->_createMap( $map_size );
-        if ( $this->_createAdminPlayer( $map_size, $adminEmail ) )
-        {
-            $raiseTime = 10 / $GLOBALS['GameMetadata']['game_speed'];
-            $raiseTime *= 2592000;
-            $raiseTime = intval( $raiseTime );
-            if ( $raiseTime < 2592000 )
-            {
-                $raiseTime = 2592000;
-            }
-            $queueModel = new QueueModel( );
-            $queueModel->addTask( new QueueTask( QS_TATAR_RAISE, 0, $raiseTime ) );
-            ( ( ) );
-        }
-    }
+    public function processSetup($map_size, $adminEmail){
+		$this->_createTables();
+		$this->_createMap($map_size);
+		if($this->_createAdminPlayer($map_size, $adminEmail)){
+			$raiseTime = 10 / $GLOBALS['GameMetadata']['game_speed'];
+			$raiseTime *= 2592000;
+			$raiseTime = intval($raiseTime);
+			if($raiseTime < 2592000){
+				$raiseTime = 2592000;
+			}
+			$queueModel = new QueueModel();
+			$queueModel->addTask(new QueueTask(QS_TATAR_RAISE, 0, $raiseTime));
+			GameLicense::set(WebHelper::getdomain());
+		}
+	}
 
-    public function _createTables( )
-    {
-        $this->provider->executeBatchQuery( "
+	public function _createTables(){
+		$this->provider->executeBatchQuery( "
 DROP TABLE IF EXISTS `g_settings`;
 DROP TABLE IF EXISTS `g_summary`;
 DROP TABLE IF EXISTS `p_alliances`;
@@ -445,16 +440,14 @@ INSERT INTO `g_summary`(`players_count`,`active_players_count`,`Arab_players_cou
         }
     }
 
-    public function _createAdminPlayer( $map_size, $adminEmail )
-    {
-        $m = new RegisterModel( );
-        $adminName = $GLOBALS['AppConfig']['system']['adminName'];
-        $result = $m->createNewPlayer( $adminName, $adminEmail, $GLOBALS['AppConfig']['system']['adminPassword'], 6, 0, $adminName, $map_size, PLAYERTYPE_ADMIN );
-        if ( $result['hasErrors'] )
-        {
-            return FALSE;
-        }
-        $m->dispose( );
-        return TRUE;
-    }
+	public function _createAdminPlayer($map_size, $adminEmail){
+		$m = new RegisterModel();
+		$adminName = $GLOBALS['AppConfig']['system']['adminName'];
+		$result = $m->createNewPlayer($adminName, $adminEmail, $GLOBALS['AppConfig']['system']['adminPassword'], 6, 0, $adminName, $map_size, PLAYERTYPE_ADMIN);
+		if($result['hasErrors']){
+			return FALSE;
+		}
+		$m->dispose();
+		return TRUE;
+	}
 }
